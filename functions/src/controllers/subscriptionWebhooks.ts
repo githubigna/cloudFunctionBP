@@ -5,11 +5,10 @@ import { mpRepository } from "../repositories/mp.repository";
 import * as functions from 'firebase-functions'
 
 
-export async function subscriptionHandler(action: string, id: string) {
-    console.log("MERCADOPAGO::",functions.config().mp.token);
-    let mpRepo = new mpRepository(id,functions.config().mp.token)
-    let webhook = new webhookrepository();
-    let usuarioR = new userRepository();
-    let subUpdate = await new subscriptionUpdate(usuarioR, webhook, mpRepo);
-    await subUpdate.executeUpdate()
+export async function subscriptionHandler(action: string, id: string) {//*-------------> Controlador de webhook de susccripción
+    let mpRepo = new mpRepository(id,functions.config().mp.token) //*-------------> Crea el repository de mercado pago 
+    let webhook = new webhookrepository();//*-------------> Crea el repository de webhooks
+    let usuarioR = new userRepository();//*-------------> Crea el repository de usuario de interfaz
+    let subUpdate = await new subscriptionUpdate(usuarioR, webhook, mpRepo); //*-------------> Crea el servicio de suscripción actualizada
+    await subUpdate.executeUpdate()//*-------------> Ejecuta la actualización del servicio de suscripción actualizada
 }

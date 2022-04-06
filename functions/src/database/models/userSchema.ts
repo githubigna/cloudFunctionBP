@@ -107,6 +107,11 @@ const UserSchema = new mongoose.Schema({
     dataStore: {
         type: Object,
         require: true,
+    },
+    onboardingComplete : {
+        type : Boolean,
+        require : true,
+        default : false
     }
 
 });

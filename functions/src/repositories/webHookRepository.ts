@@ -1,38 +1,32 @@
 import { iwebHookRepository } from "../interfaces/webHookInterface";
 import { webhookTypeEnum } from "../types/hooksEnum";
-import { Axios } from "axios"
-const axios = new Axios()
-
+import {categoryUpdate} from "../database/models/categoryUpdates"
+import axios from "axios"
 export class webhookrepository implements iwebHookRepository {
     async delete(id: string | null, storeId: string, accessToken: string): Promise<void> {
-        console.log("Delete webhook::", id);
+        if(id === null) return;
         try {
-            const response = await fetch(`https://api.tiendanube.com/v1/${storeId}/webhooks/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    "Content-Type": "application/json",
-                    Authentication: `bearer ${accessToken}`,
-                    "User-Agent": "Flowy - Cross-sell & Up-sell (appflowy@gmail.com)",
-                },
-            });
-            console.log("Response delete WebHook::", response);
-
+            await axios.delete(`https://api.tiendanube.com/v1/${storeId}/webhooks/${id}`,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authentication: `bearer ${accessToken}`,
+                        "User-Agent": "Flowy - Cross-sell & Up-sell (appflowy@gmail.com)",
+                    },
+                })
         } catch (error) {
-            console.log("Error delete WebHook webHookRepository::", error);
+            throw new Error("Error en delete webhook (webHookRepository.delete :: linea 7 :: src/repositories/webHookRepository.ts ::)")
         }
     }
     async add(webhookType: webhookTypeEnum, storeId: string, accessToken: string): Promise<string> {
-        console.log("Add webhook::", webhookType);
-        let urlEnd: string;
-        if (webhookType === "order/paid") {
-            urlEnd = "order";
-        } else {
-            urlEnd = "category_updated";
-
-        }
         try {
-
-            const response = axios.post(`https://api.tiendanube.com/v1/${storeId}/webhooks`,
+            let urlEnd: string;
+            if (webhookType === "order/paid") {
+                urlEnd = "order";
+            } else {
+                urlEnd = "category_updated";
+            }
+            let res = await axios.post(`https://api.tiendanube.com/v1/${storeId}/webhooks`,
                 {
                     url: `https://flowy.com.ar/api/webhooks/${urlEnd}`,
                     event: webhookType,
@@ -44,15 +38,16 @@ export class webhookrepository implements iwebHookRepository {
                         "User-Agent": "Flowy - Cross-sell & Up-sell (appflowy@gmail.com)",
                     }
                 })
-
-            console.log("Response add WebHook::", response);
-
+            if(webhookType === "category/updated"){
+                await categoryUpdate.findOneAndUpdate({"store_id":storeId},{
+                    $set:{
+                        "hook_id":res.data.id
+                    }
+                })
+            }
+            return res.data.id
         } catch (error) {
-            console.log("Error add WebHook webHookRepository::", error);
+            throw new Error("Error en add webhook (webHookRepository.add :: linea 21 :: src/repositories/webHookRepository.ts ::)")
         }
-        /**
-         * AGREGAR EN TIENDANUBE UN WEBHOOK todo
-         */
-        return "id"
     }
 }
