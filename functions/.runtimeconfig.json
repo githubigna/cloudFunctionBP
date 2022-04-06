@@ -1,0 +1,9 @@
+{
+  "mercadopago": {
+    "id": "THE CLIENT ID",
+    "key": "THE API KEY"
+  },
+  "mp": {
+    "token": "APP_USR-1887482204388765-102914-5031c8b7ab28de1bc527139665223882-673738357"
+  }
+}
